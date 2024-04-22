@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oracle.erpProject.LHS_RnP_closingMapper">
+
+	<select id="lhsGetTotalRnPCondBuy" parameterType="LHS_RnP_closing" resultType="int">
+		SELECT count(*)
+		FROM buying b, buying_detail bd, product p
+		WHERE b.buy_date = bd.buy_date
+		    AND b.cust_no = bd.cust_no
+		    AND bd.p_itemcode = p.p_itemcode
+		    AND b.buy_date = #{rnpc_date}
+   		    <choose>
+				<when test="gubun == 'all'">
+				</when>
+				<when test="gubun == 'ing'">
+					AND b.buy_status = 0
+				</when>
+				<when test="gubun == 'cancel'">
+					AND b.buy_status = 1
+				</when>
+				<when test="gubun == 'complete'">
+					AND b.buy_status = 2
+				</when>
+				<when test="gubun == 'close'">
+					AND b.buy_status = 5
+				</when>
+			</choose> 
+	</select>
+	
+	<select id="lhsGetListRnpCondBuy" parameterType="LHS_RnP_closing" resultType="LHS_RnP_closing">
+		SELECT *
+		FROM	
+			(SELECT rownum rn, a.*
+			 FROM
+			 	 (SELECT p.p_name rnpc_p_name, p.p_itemcode rnpc_itemcode, 
+			 	 		 bd.bd_cnt rnpc_cnt, b.buy_manager rnpc_manager, to_char(b.buy_wdate, 'yyyy-mm-dd') rnpc_regdate,
+			 	 		 CASE WHEN b.buy_status = 0 THEN '구매진행'
+					        WHEN b.buy_status = 1 THEN '구매취소'
+					        WHEN b.buy_status = 2 THEN '구매완료'
+					        WHEN b.buy_status = 5 THEN '수불완료'
+					    END AS rnpc_status
+				  FROM buying b, buying_detail bd, product p
+				  WHERE b.buy_date = bd.buy_date
+				      AND b.cust_no = bd.cust_no
+				      AND bd.p_itemcode = p.p_itemcode
+				      AND b.buy_date = #{rnpc_date}
+					<choose>
+						<when test="gubun == 'all'">
+						</when>
+						<when test="gubun == 'ing'">
+							AND b.buy_status = 0
+						</when>
+						<when test="gubun == 'cancel'">
+							AND b.buy_status = 1
+						</when>
+						<when test="gubun == 'complete'">
+							AND b.buy_status = 2
+						</when>
+						<when test="gubun == 'close'">
+							AND b.buy_status = 5
+						</when>
+					</choose> 
+
+				  ORDER BY b.buy_status DESC, p.p_itemcode
+				 ) a
+			) 
+		WHERE rn BETWEEN #{start} and #{end}
+	</select>
+	
+	<select id="lhsGetTotalRnPCondSale" parameterType="LHS_RnP_closing" resultType="int">
+		SELECT count(*)
+		FROM sale s, sale_detail sd, product p
+		WHERE s.s_date = sd.s_date
+		    AND s.cust_no = sd.cust_no
+		    AND sd.p_itemcode = p.p_itemcode
+		    AND s.s_date = #{rnpc_date}
+		    AND s.s_status NOT IN (2, 3)
+   		    <choose>
+				<when test="gubun == 'all'">
+				</when>
+				<when test="gubun == 'ing'">
+					AND s.s_status = 0
+				</when>
+				<when test="gubun == 'cancel'">
+					AND s.s_status = 1
+				</when>
+				<when test="gubun == 'complete'">
+					AND s.s_status = 4
+				</when>
+				<when test="gubun == 'close'">
+					AND s.s_status = 5
+				</when>
+			</choose> 	
+	</select>
+	
+	<select id="lhsGetListRnPCondSale" parameterType="LHS_RnP_closing" resultType="LHS_RnP_closing">
+		SELECT *
+		FROM	
+			(SELECT rownum rn, a.*
+			 FROM
+			 	 (SELECT p.p_name rnpc_p_name, p.p_itemcode rnpc_itemcode, 
+			 	 		 sd.sd_cnt rnpc_cnt, s.s_manager rnpc_manager, to_char(s.s_wdate, 'yyyy-MM-dd') rnpc_regdate,
+			 	 		 CASE WHEN s.s_status = 0 THEN '판매진행'
+			 	 		 	WHEN s.s_status = 1 THEN '판매취소'
+					        WHEN s.s_status = 4 THEN '판매완료'
+					        WHEN s.s_status = 5 THEN '수불완료'
+					    END AS rnpc_status
+				  FROM sale s, sale_detail sd, product p
+				  WHERE s.s_date = sd.s_date
+				      AND s.cust_no = sd.cust_no
+				      AND sd.p_itemcode = p.p_itemcode
+				      AND s.s_date = #{rnpc_date}
+      		    	  AND s.s_status NOT IN (2, 3)
+					<choose>
+						<when test="gubun == 'all'">
+						</when>
+						<when test="gubun == 'ing'">
+							AND s.s_status = 0
+						</when>
+						<when test="gubun == 'cancel'">
+							AND s.s_status = 1
+						</when>
+						<when test="gubun == 'complete'">
+							AND s.s_status = 4
+						</when>
+						<when test="gubun == 'close'">
+							AND s.s_status = 5
+						</when>
+					</choose> 
+				  ORDER BY s.s_status DESC, p.p_itemcode
+				 ) a
+			) 
+		WHERE rn BETWEEN #{start} and #{end}
+	</select>
+	
+	<select id="lhsGetTotalRnPCondMake" parameterType="LHS_RnP_closing" resultType="int">
+		SELECT count(*)
+		FROM make m, make_detail md, factory f, product p
+		WHERE m.m_num = md.m_num
+		    AND md.f_id = f.f_id
+		    AND md.p_itemcode = p.p_itemcode
+		    AND to_date(m.m_due_date) = #{rnpc_date}
+		    AND m.m_status >= 3
+		    <choose>
+		        <when test="gubun == 'all'">
+		        </when>
+		        <when test="gubun == 'ing'">
+		            AND m.m_status = 2
+		        </when>
+		        <when test="gubun == 'complete'">
+		            AND m.m_status = 3
+		        </when>
+		        <when test="gubun == 'close'">
+		            AND m.m_status = 5
+		        </when>
+		    </choose> 	
+	</select>
+	
+	<select id="lhsGetListRnPCondMake" parameterType="LHS_RnP_closing" resultType="LHS_RnP_closing">
+		SELECT *
+		FROM	
+			(SELECT rownum rn, a.* 
+			 FROM
+			 	 (SELECT p.p_name rnpc_p_name, p.p_itemcode rnpc_itemcode, md.md_pro_quantity rnpc_cnt, 
+			 	 		 m.m_manager rnpc_manager, to_char(to_date(m.m_due_date), 'yyyy-MM-dd') rnpc_regdate,
+			 	 		 CASE WHEN m.m_status = 2 THEN '생산진행'
+					        WHEN m.m_status = 3 THEN '생산완료'
+					        WHEN m.m_status = 5 THEN '수불완료'
+					    END AS rnpc_status
+				    FROM make m, make_detail md, factory f, product p
+					WHERE m.m_num = md.m_num
+				    AND md.f_id = f.f_id
+				    AND md.p_itemcode = p.p_itemcode
+				    AND to_date(m.m_due_date) = #{rnpc_date}
+	    		    AND m.m_status >= 3
+					<choose>
+				        <when test="gubun == 'all'">
+				        </when>
+				        <when test="gubun == 'ing'">
+				            AND m.m_status = 2
+				        </when>
+				        <when test="gubun == 'complete'">
+				            AND m.m_status = 3
+				        </when>
+				        <when test="gubun == 'close'">
+				            AND m.m_status = 5
+				        </when>
+				    </choose> 	
+				  ORDER BY m.m_status DESC, p.p_itemcode
+				 ) a
+			) 
+		WHERE rn BETWEEN #{start} and #{end}
+	</select>
+	
+	<select id="lhsGetTotalRnPCondSurvey" parameterType="LHS_RnP_closing" resultType="int">
+		SELECT count(*)
+		FROM product p, stock s, stock_survey ss
+		WHERE p.p_itemcode = s.p_itemcode
+		    AND p.p_itemcode = ss.p_itemcode
+		    AND s.st_year_month = ss.st_year_month
+		    AND s.st_begin_end = ss.st_begin_end
+		    AND ss.st_year_month = to_char(#{rnpc_date}, 'yyyyMM')
+		    AND ss.st_begin_end = 1
+	</select>
+	
+	<select id="lhsGetListRnPCondSurvey" parameterType="LHS_RnP_closing" resultType="LHS_RnP_closing">
+		SELECT *
+		FROM	
+			(SELECT rownum rn, a.*
+			 FROM
+			 	 (SELECT p.p_name rnpc_p_name, ss.p_itemcode rnpc_itemcode, ss.sts_quantity rnpc_cnt, 
+			 	 		 ss.sts_realcnt rnpc_cnt_real, ss.sts_disposalcnt rnpc_cnt_disposal, to_char(ss.sts_regdate, 'yyyy-mm-dd') rnpc_regdate
+				  FROM product p, stock s, stock_survey ss
+				  WHERE p.p_itemcode = s.p_itemcode
+				      AND p.p_itemcode = ss.p_itemcode
+				      AND s.st_year_month = ss.st_year_month
+				      AND s.st_begin_end = ss.st_begin_end
+				      AND ss.st_year_month = to_char(#{rnpc_date}, 'yyyyMM')
+				      AND ss.st_begin_end = 1
+				  ORDER BY p.p_itemcode
+				 ) a
+			) 
+		WHERE rn BETWEEN #{start} and #{end}
+	</select>
+	
+	<select id="lhsCheckGubunRnPClosing" parameterType="map" statementType="CALLABLE">
+		{ call stock_close.check_gubun_rnp_closing (
+	        #{p_yyyymmdd, mode=IN, jdbcType=VARCHAR},
+	        #{p_rnpc_gubun, mode=OUT, jdbcType=INTEGER}
+	    ) }
+	</select>
+
+</mapper>

@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oracle.erpProject.YhsBoard">
+
+   <select id="boardTotal" parameterType="YhsBoard"  resultType="int">
+		SELECT count(*) FROM BOARD b
+   </select>
+
+	<select id="yhsBoardListAll" parameterType="YhsBoard" resultType="YhsBoard">
+		<![CDATA[
+		select * 
+		from 
+		( 
+			SELECT rownum rn , a.*
+			FROM 
+						(select * from board order by b_no desc) a
+		)
+		WHERE  rn  >= #{start} 
+ 		and    rn  <= #{end}    
+ 	 ]]>
+   </select>
+   
+	<select id="yhsboardContents" parameterType="int"
+	resultType="YhsBoard">
+	SELECT board.*, e.emp_no
+	FROM board
+	INNER JOIN employee e
+	ON board.EMP_NO = e.EMP_NO
+	WHERE BOARD.B_NO = #{b_no}
+	</select>
+   
+   	<update id="yhsboardViewCnt" parameterType="YhsBoard">
+		update board
+		set b_hit = b_hit+1 where
+		b_no=#{b_no}
+	</update>
+	
+	<insert id="yhsInsertBoard" parameterType="YhsBoard">
+		INSERT INTO BOARD(B_NO,EMP_NO,B_CATEGORY,BOARD_MID,B_NAME,B_CONTENT,B_FILE,B_HIT,B_REGDATE,B_GROUP,B_REPLY_NO,B_INDENT)
+		VALUES (b_no_seq.nextval,
+				#{emp_no},
+				1,
+				1,
+				#{b_name}, 
+				#{b_content},
+				0,
+				0,
+				sysdate,
+				0,
+				0,
+				0
+				)
+	</insert>	
+	
+	<delete id="yhsdeleteBoard" parameterType="YhsBoard">
+	    delete 
+	    from 
+	    BOARD 
+	  	where b_no= #{b_no}
+   </delete>
+   
+   	<select id="yhsboardModify" parameterType="int"
+		resultType="YhsBoard">
+		select *
+		from board
+		where b_no = #{b_no}
+	</select>
+   
+   <update id="yhsboardUpdate" parameterType="YhsBoard">
+   		update board
+		set b_name=#{b_name},
+			b_content=#{b_content}
+		where b_no=#{b_no}
+   </update>
+   
+
+<select id="yhsSearchboard" parameterType="Yhsboard" resultType="Yhsboard">
+    SELECT *
+    FROM
+    (
+        SELECT rownum rn, a.*
+        FROM
+        (
+            SELECT * FROM board
+            WHERE b_name LIKE '%' || #{keyword} || '%'
+            ORDER BY b_name
+        ) a
+    )
+    WHERE rn BETWEEN #{start} and #{end}
+</select>
+
+
+
+
+
+
+
+
+</mapper>

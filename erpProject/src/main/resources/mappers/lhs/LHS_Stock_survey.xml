@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oracle.erpProject.LHS_Stock_surveyMapper">
+
+	<select id="lhsCheckExistenceStockSurvey" parameterType="LHS_Stock" resultType="int">
+		SELECT count(*)
+		FROM stock_survey
+		WHERE st_year_month = #{st_year_month}
+	</select>
+	
+	<select id="lhsCheckExistenceStockSurveyPerItemcode" parameterType="LHS_Stock_survey" resultType="int">
+		SELECT count(*)
+		FROM stock_survey
+		WHERE st_year_month = #{st_year_month}
+			AND p_itemcode = #{p_itemcode}
+	</select>
+	
+	<insert id="lhsRegistStockSurvey" parameterType="LHS_Stock_survey">
+		INSERT INTO stock_survey
+		VALUES (#{st_year_month}, 1, #{p_itemcode}, #{sts_quantity}, #{sts_realcnt}, #{sts_disposalcnt}, sysdate)
+	</insert>
+	
+	<update id="lhsUpdateStockSurvey" parameterType="LHS_Stock_survey">
+		UPDATE stock_survey SET sts_quantity = #{sts_quantity},
+								sts_realcnt = #{sts_realcnt},
+								sts_disposalcnt = #{sts_disposalcnt},
+								sts_regdate = sysdate
+		WHERE st_year_month = #{st_year_month}
+			AND st_begin_end = 1
+			AND p_itemcode = #{p_itemcode}
+	</update>
+
+</mapper>

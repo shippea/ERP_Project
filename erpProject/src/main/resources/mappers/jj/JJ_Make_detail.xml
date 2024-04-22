@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oracle.erpProject.JJ_Make_detailMapper">
+
+<!-- ============================ JJ's mappers start ============================ -->
+	<!-- 생산게시판 글의 총 갯수 파악하는 쿼리 -->
+	<select id="jjcntMake" parameterType="JJ_Make_detail" resultType="int">
+		SELECT Count(*)
+		FROM Make_detail
+		JOIN Make ON Make_detail.m_num = Make.m_num
+	</select>
+
+	<!-- 생산게시판 전체 게시글을 불러오는 쿼리 -->
+	<select id="jjMakeDetailList" parameterType="JJ_Make_detail" resultType="JJ_Make_detail">
+		<![CDATA[
+		SELECT *
+		FROM (
+			SELECT ROWNUM rn, md.*, p.p_name, m.m_status, m.m_sdate, m.m_due_date
+			FROM (
+				SELECT *
+				FROM Make_detail
+			) md
+			JOIN Product p ON md.p_itemcode = p.p_itemcode
+			JOIN make m ON md.m_num = m.m_num 
+			ORDER BY md.m_num DESC
+		)
+		WHERE rn >= #{start}
+		AND rn <= #{end}
+		]]>
+	</select>
+	
+	<!-- 생산요청 페이지 시 값들을 불러오는 쿼리 -->
+	<select id="jjRequestMakeList" resultType="JJ_Make_detail">
+		SELECT	*
+		FROM	Make_detail
+	</select>
+	
+	<!-- 생산게시판에서 1개의 글만 여는 쿼리 -->
+	<select id="jjmakeDetail" parameterType="int" resultType="JJ_Make_detail">
+		SELECT md.m_num,         md.md_num,           md.f_id,     m.m_status,
+		       md.p_itemcode,    md.md_worker,       
+		       m.m_sdate,  
+		       m.m_due_date,
+		       md.md_quantity,   md.md_pro_quantity,              md.rnpc_gubun,
+		       md.md_worker_num, md.md_note,         md.s_date,   md.cust_no,
+			   p.p_name,         f.f_name,           m.m_manager, f.f_id
+		FROM Make_detail md
+			JOIN Product p ON md.p_itemcode = p.p_itemcode
+			JOIN Factory f ON md.f_id = f.f_id
+            JOIN Make m ON md.m_num = m.m_num
+		WHERE md.m_num = #{m_num}		
+	</select>
+	
+	<!-- 검색어로 조회든 글을 카운트하는 쿼리 -->
+	<select id="makeSearchCnt" parameterType="JJ_Make_detail" resultType="int">
+		SELECT Count(*)
+		FROM Make_detail md
+			JOIN Product p ON md.p_itemcode = p.p_itemcode
+			JOIN Factory f ON md.f_id = f.f_id
+			JOIN Make m ON md.m_num = m.m_num
+		WHERE (md.m_num LIKE '%' || #{keyword} || '%'
+			OR md.md_num LIKE '%' || #{keyword} || '%'
+			OR m.m_status LIKE '%' || #{keyword} || '%' 
+			OR md.rnpc_gubun LIKE '%' || #{keyword} || '%' 
+			OR p.p_name LIKE '%' || #{keyword} || '%' 
+			OR md.md_worker LIKE '%' || #{keyword} || '%') 
+	</select>
+	
+	<!-- 검색어로 조회든 글들을 불러오는 쿼리 -->
+	<select id="makeSearchList" parameterType="JJ_Make_detail" resultType="JJ_Make_detail">
+ 		SELECT *
+		FROM
+		(
+			SELECT ROWNUM rn, f.*
+			FROM
+			(
+				SELECT md.*, p.p_name, f.f_name, m.m_status, m.m_sdate, m.m_due_date
+				FROM Make_detail md
+					JOIN Product p ON md.p_itemcode = p.p_itemcode
+					JOIN Factory f ON md.f_id = f.f_id
+					JOIN Make m ON md.m_num = m.m_num
+				WHERE md.m_num LIKE '%' || #{keyword} || '%'
+					OR md.md_num LIKE '%' || #{keyword} || '%'
+					OR m.m_status LIKE '%' || #{keyword} || '%' 
+					OR md.rnpc_gubun LIKE '%' || #{keyword} || '%' 
+					OR p.p_name LIKE '%' || #{keyword} || '%' 
+					OR md.md_worker LIKE '%' || #{keyword} || '%'
+				ORDER BY md.m_num DESC
+			) f
+		)
+		WHERE rn BETWEEN #{start} AND #{end}
+	</select>
+	
+	<!-- 조회된 글을 삭제하는 쿼리 -->
+	<delete id="jjmakeDelete" parameterType="int">
+		DELETE FROM Make_detail
+		WHERE m_num = #{m_num}
+	</delete>
+
+
+<!-- ============================ JJ's mappers 끝 ============================ -->
+
+</mapper>

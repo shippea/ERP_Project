@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oracle.erpProject.LHS_EmpMapper">
+                
+	<select id="lhsGetListEmp" resultType="LHS_Employee">
+		SELECT *
+		FROM employee e, department d
+		WHERE e.dept_no = d.dept_no
+	</select>
+	
+	<select id="lhsGetDataEmp" parameterType="int" resultType="LHS_Employee">
+		SELECT *
+		FROM employee e
+		WHERE e.emp_no = #{emp_no}
+	</select>
+	
+
+</mapper>

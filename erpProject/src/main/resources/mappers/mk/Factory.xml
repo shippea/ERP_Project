@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oracle.erpProject.mkFactoryMapper">
+	<!-- 제품 리스트 조회  -->
+	<select id="mkfactoryList" resultType="mkFactory">
+		<![CDATA[
+		select * 
+		from 
+		( 
+			SELECT rownum rn , a.*
+			FROM 
+						(select * from factory order by f_id ) a
+		)
+		WHERE rn >=#{start}
+		and rn <= #{end}
+		]]>
+	</select>
+	
+		<select id="mktotFactory" resultType="int">
+		select Count(*) from factory
+	</select>
+	
+		<!-- 공장 상세 조회  -->
+	<select id="mkFactoryDetail" parameterType="mkFactory" resultType="mkFactory">
+	<![CDATA[
+		select * from factory
+		where f_id=${f_id}
+		]]>
+	</select>
+	
+	<insert id="mkinsertFactory" parameterType="mkFactory">
+    INSERT INTO factory
+    ( f_id, f_admin,f_manager,f_name,f_tel,f_info)
+    VALUES (f_id_seq.nextval, #{f_admin}, #{f_manager}, #{f_name}, #{f_tel}, #{f_info})
+</insert>
+
+ <select id="mksearchFactoryCnt" resultType="int">
+		SELECT Count(*) FROM factory
+ 		<choose>
+ 			<when test="search == 'f_id'">
+                 WHERE f_id  like '%' || #{keyword} || '%'    
+  			</when>
+  			<when test="search == 'f_name'">
+                 WHERE f_name like '%' || #{keyword} || '%'    
+  			</when>
+            <otherwise>
+                  WHERE f_id   like '%'   
+            </otherwise>
+        </choose>
+ </select>
+ 
+ 
+ <select id="mksearchFactoryList" parameterType="mkFactory" resultType="mkFactory">
+   
+    SELECT *
+    FROM
+    (
+            SELECT rownum rn, a.*
+            FROM
+                (SELECT * FROM factory
+                <choose>
+                    <when test="search == 'f_id'">
+                        WHERE f_id LIKE '%' || #{keyword} || '%'    
+                    </when>
+                    <when test="search == 'f_name'">
+                        WHERE f_name LIKE '%' || #{keyword} || '%'    
+                    </when>
+                    <otherwise>
+                        WHERE f_id LIKE '%'   
+                    </otherwise>
+                </choose>
+                ORDER BY f_id
+                ) a
+    )
+    WHERE rn BETWEEN #{start} and #{end}
+ 
+</select>
+
+		<update id="mkupdateFactory" parameterType="mkFactory">
+			    UPDATE factory
+			    SET 
+			    f_admin = #{f_admin}, 
+			    f_manager =#{f_manager}, 
+			    f_name=#{f_name}, 
+			    f_tel = #{f_tel}, 
+			    f_info = #{f_info}<!-- 여기에 컴마 추가 -->		
+			    WHERE f_id = #{f_id}
+			</update>
+			
+<!-- ============================ JJ's mappers start ============================ -->
+	<select id="jjFactoryList" resultType="mkFactory">
+		SELECT *
+		FROM factory
+	</select>
+<!-- ============================ JJ's mappers 끝 ============================ -->
+
+</mapper>

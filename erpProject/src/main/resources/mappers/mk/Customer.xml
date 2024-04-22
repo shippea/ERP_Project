@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oracle.erpProject.mkCustomerMapper">
+
+
+
+	<select id="mklistCustomer" resultType="mkCustomer">
+		<![CDATA[
+		select b.*,
+			CASE 
+				WHEN cust_status = 0 THEN '거래중'
+				WHEN cust_status =1 THEN '거래중지'
+   			END AS cust_status_content
+		from 
+		( 
+			SELECT rownum rn , a.*
+			FROM 
+						(select * from customer order by cust_no) a
+		) b
+		WHERE rn >=#{start}
+		and rn <= #{end}
+		]]>
+	</select>
+
+
+	<select id="totalCustomer" resultType="int">
+		select Count(*) from customer
+	</select>
+	
+	<!-- 제품 상세 조회  -->
+	<select id="mkgetCustomerDetail" parameterType="mkCustomer" resultType="mkCustomer">
+	<![CDATA[
+		select * from customer 
+		where cust_no=${cust_no}
+		]]>
+	</select>
+	
+	<select id="mktotalsearchedCustomerTotal" resultType="int">
+		SELECT Count(*) FROM customer
+ 		<choose>
+ 			<when test="search == 'cust_no'">
+                 WHERE cust_no  like '%' || #{keyword} || '%'    
+  			</when>
+  			<when test="search == 'cust_name'">
+                 WHERE cust_name like '%' || #{keyword} || '%'    
+  			</when>
+            <otherwise>
+                  WHERE cust_no  like '%'   
+            </otherwise>
+        </choose>
+ </select>
+ 
+ 
+ <select id="mksearcedCustomer" parameterType="mkCustomer" resultType="mkCustomer">
+   
+    SELECT *
+    FROM
+    (
+            SELECT rownum rn, a.*
+            FROM
+                (SELECT * FROM customer
+                <choose>
+                    <when test="search == 'cust_no'">
+                        WHERE cust_no LIKE '%' || #{keyword} || '%'    
+                    </when>
+                    <when test="search == 'cust_name'">
+                        WHERE cust_name LIKE '%' || #{keyword} || '%'    
+                    </when>
+                    <otherwise>
+                        WHERE cust_no LIKE '%'   
+                    </otherwise>
+                </choose>
+                ORDER BY cust_no
+                ) a
+    )
+    WHERE rn BETWEEN #{start} and #{end}
+ 
+</select>
+
+
+	<update id="UpdateCustomer" parameterType="mkCustomer">
+    UPDATE customer
+    SET 
+    cust_bcomm = #{cust_bcomm}, 
+    cust_scomm = #{cust_scomm}, 
+    cust_type = #{cust_type}, 
+    cust_name = #{cust_name}, 
+    cust_boss = #{cust_boss},
+    cust_b_num = #{cust_b_num},
+    cust_tel = #{cust_tel},
+    cust_email = #{cust_email}
+    WHERE cust_no = #{cust_no}
+</update>
+
+
+<insert id="mkinsertCustomer" parameterType="mkCustomer">
+    INSERT INTO customer
+    (cust_no, cust_name, cust_bcomm, cust_scomm, cust_type, cust_boss, cust_b_num, cust_tel, cust_email,cust_status,emp_no)
+    VALUES (cust_no_seq.nextval, #{cust_name}, 400, #{cust_scomm}, #{cust_type}, #{cust_boss}, #{cust_b_num}, #{cust_tel}, #{cust_email},#{cust_status},#{emp_no})
+</insert>
+
+<select id="empList" resultType="mkEmployee">
+	select emp_no, emp_name from employee
+</select>
+
+<select id="custCategory"  resultType="mkCustomer">
+		
+		select comm_bcd,comm_mcd,comm_content from comm where comm_bcd=400
+
+		</select>  
+
+
+<select id="custEmpList" parameterType="mkEmployee" resultType="mkEmployee">
+		select emp_no , emp_name from employee where dept_no =103
+
+		</select>  
+		
+		
+<select id="custEmpList2" parameterType="mkEmployee" resultType="mkEmployee">
+		select emp_no , emp_name from employee where dept_no =104
+
+		</select>  
+		
+		
+
+</mapper>

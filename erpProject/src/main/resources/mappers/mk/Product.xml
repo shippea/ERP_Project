@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oracle.erpProject.mkProductMapper">
+ 
+
+
+	<!-- 제품 리스트 조회  -->
+	<select id="mkproductList" resultType="mkProduct">
+		<![CDATA[
+		select * 
+		from 
+		( 
+			SELECT rownum rn , a.*
+			FROM 
+						(select * from product order by p_itemcode ) a
+		)
+		WHERE rn >=#{start}
+		and rn <= #{end}
+		]]>
+	</select>
+	
+	<!-- 제품 상세 조회  -->
+	<select id="mkproductDetail" parameterType="mkProduct" resultType="mkProduct">
+		  <![CDATA[
+	    SELECT p.*, f.f_name 
+	    FROM product p
+	    LEFT JOIN factory f ON p.f_id = f.f_id
+	    WHERE p.p_itemcode = #{p_itemcode}
+	    ]]>
+	</select>
+	
+	<select id="mktotProduct" resultType="int">
+		select Count(*) from product
+	</select>
+	
+<insert id="mkinsertProductSale" parameterType="mkProduct">
+    INSERT INTO product 
+    (p_itemcode, f_id, pro_category, pro_midcategory, p_name, p_content, p_buyprice, p_saleprice, p_regdate,p_image, p_fac_gubun)
+    VALUES (p_itemcode_seq.nextval, #{f_id}, 300, #{pro_midcategory}, #{p_name}, #{p_content}, #{p_buyprice}, #{p_saleprice}, SYSDATE,#{p_image},0)
+</insert>
+
+<insert id="mkinsertProductBuy" parameterType="mkProduct">
+    INSERT INTO product 
+    (p_itemcode, f_id, pro_category, pro_midcategory, p_name, p_content, p_buyprice, p_saleprice, p_regdate,p_image, p_fac_gubun)
+    VALUES (p_itemcode_seq.nextval, #{f_id}, 300, #{pro_midcategory}, #{p_name}, #{p_content}, #{p_buyprice}, #{p_saleprice}, SYSDATE,#{p_image},1)
+</insert>
+
+<select id="productSearchList" parameterType="mkProduct" resultType="mkProduct">
+   
+    SELECT *
+    FROM
+    (
+            SELECT rownum rn, a.*
+            FROM
+                (SELECT * FROM product
+                <choose>
+                    <when test="search == 'p_itemcode'">
+                        WHERE p_itemcode LIKE '%' || #{keyword} || '%'    
+                    </when>
+                    <when test="search == 'p_name'">
+                        WHERE p_name LIKE '%' || #{keyword} || '%'    
+                    </when>
+                    <otherwise>
+                        WHERE p_itemcode LIKE '%'   
+                    </otherwise>
+                </choose>
+                ORDER BY p_itemcode
+                ) a
+    )
+    WHERE rn BETWEEN #{start} and #{end}
+ 
+</select>
+
+   
+ 	<select id="searchedProductTotal"  parameterType="mkProduct"  resultType="int">
+		
+		SELECT Count(*) FROM product
+ 		<choose>
+ 			<when test="search == 'p_itemcode'">
+                 WHERE p_itemcode  like '%' || #{keyword} || '%'    
+  			</when>
+  			<when test="search == 'p_name'">
+                 WHERE p_name like '%' || #{keyword} || '%'    
+  			</when>
+            <otherwise>
+                  WHERE p_itemcode   like '%'   
+            </otherwise>
+        </choose>
+		
+	</select>  
+	<!-- 제품 등록 : 이미지 등록  -->
+<!-- 	<insert id="saveProductImagePath" parameterType="mkProduct">
+    INSERT INTO product (p_itemcode, f_id, pro_category, pro_midcategory, p_name, p_content, p_buyprice, p_saleprice, p_regdate, p_fac_gubun)
+    VALUES (product_code_seq.nextval, #{f_id}, #{pro_category}, #{pro_midcategory}, #{p_name}, #{p_content}, #{p_buyprice}, #{p_saleprice}, SYSDATE, #{p_fac_gubun})
+</insert> --> 
+	
+	<!--  -->
+		<update id="mkupdateProduct" parameterType="mkProduct">
+		    UPDATE product SET
+		    <if test="p_image != null">
+		    p_image=#{p_image},
+		    </if>
+		    f_id = #{f_id},
+		    pro_category = 300,
+		    pro_midcategory = #{pro_midcategory},
+		    p_name = #{p_name},
+		    p_buyprice = #{p_buyprice},
+		    p_saleprice = #{p_saleprice},
+		    p_isdeleted = #{p_isdeleted}
+		    WHERE p_itemcode = #{p_itemcode}
+		</update>
+			
+		<select id="proCategory"  resultType="mkProduct">
+		
+		select comm_bcd,comm_mcd,comm_content from comm where comm_bcd=300
+
+		</select>  
+		
+		<select id="fList"  resultType="mkProduct">
+		
+		select f_name,f_id from factory 
+
+		</select>  
+
+<!-- ============================ JJ's mappers start ============================ -->
+	<!-- 제품 상세 조회  -->
+	<select id="jjproductList" parameterType="mkProduct" resultType="mkProduct">
+		SELECT a.*
+		FROM 
+			(select * from product where pro_midcategory>=103 order by p_itemcode ) a
+	</select>
+<!-- ============================ JJ's mappers 끝 ============================ -->
+
+</mapper>

@@ -1,0 +1,372 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oracle.erpProject.BuyingMapper">
+
+
+	<select id="LsltotalbuyingCnt" resultType="int">
+		select count(*)
+		from
+		buying B,customer c
+		WHERE b.cust_no = c.cust_no
+		and c.cust_type = 1
+	</select>
+	<select id="LslbuyAlllist" resultType="SLBuying">
+	<![CDATA[
+		select * 
+		from 
+		( 
+			SELECT rownum rn , a.*
+			FROM 
+						(
+		SELECT
+		    b.*,
+		    e.EMP_NAME,
+		    e.dept_no,
+		    c.CUST_NAME,
+		    CASE
+		        WHEN b.buy_status = 0 THEN '구매 진행중'
+		        WHEN b.buy_status = 1 THEN '구매 취소'
+		        WHEN b.buy_status = 2 THEN '구매 완료'
+		        WHEN b.buy_status = 5 THEN '수불 완료'
+		    END AS buy_status_detail,
+		    (
+		        SELECT COUNT(DISTINCT bd.P_ITEMCODE)
+		        FROM buying_detail bd
+		        WHERE BD.CUST_NO = B.CUST_NO
+		        AND BD.buy_date = b.buy_date
+		    ) AS productCnt,
+		    (
+		        SELECT SUM(bd.bd_price * bd.bd_cnt)
+		        FROM buying_detail bd
+		        WHERE bd.cust_no = b.cust_no
+		        AND bd.buy_date = b.buy_date
+		    ) AS totalMoney,
+		    (
+		        SELECT SUM(bd.bd_cnt)
+		        FROM buying_detail bd
+		        WHERE BD.CUST_NO = B.CUST_NO
+		        AND BD.buy_date = b.buy_date
+		    ) AS totalCnt
+		FROM
+		    BUYING b
+		    JOIN EMPLOYEE e ON b.EMP_NO = e.EMP_NO
+		    JOIN CUSTOMER c ON b.CUST_NO = c.CUST_NO
+		WHERE c.cust_type = 1
+		ORDER BY b.buy_wdate DESC
+		) a
+		)
+		WHERE rn >=#{start}
+		and rn <= #{end}
+		]]>
+	</select>
+
+
+	<select id="LsldateSearchtotCnt" resultType="int"
+		parameterType="SLBuying">
+		SELECT COUNT(*)
+		FROM buying B, customer c
+		WHERE b.cust_no = c.cust_no
+		    AND b.buy_date = #{buy_date}
+		    AND c.cust_type = 1
+	</select>
+	<select id="LsldateSearchAllList" parameterType="SLBuying" resultType="SLBuying">
+          SELECT *
+   		  FROM
+    		(
+            SELECT rownum rn, a.*
+            FROM
+                ( SELECT
+					b.*,
+					e.EMP_NAME,
+					c.CUST_NAME,
+					CASE
+						WHEN b.buy_status = 0 THEN '구매 진행중'
+						WHEN b.buy_status = 1 THEN '구매 취소'
+						WHEN b.buy_status = 2 THEN '구매 완료'
+						WHEN b.buy_status = 5 THEN '수불 완료'
+					END AS buy_status_detail,
+				 ( 
+					SELECT COUNT(DISTINCT bd.P_ITEMCODE)
+			        FROM buying_detail bd
+			        WHERE BD.CUST_NO = B.CUST_NO
+			        AND BD.buy_date = b.buy_date
+				 ) AS productCnt,
+				 (
+					SELECT SUM(bd.bd_price * bd.bd_cnt)
+					FROM buying_detail bd
+					WHERE B.CUST_NO = bd.cust_no
+				 ) AS totalMoney,
+				(
+					SELECT SUM(bd.bd_cnt)
+					FROM buying_detail bd
+					WHERE B.CUST_NO = bd.cust_no
+				) AS totalCnt
+				FROM
+					BUYING b
+					JOIN EMPLOYEE e ON b.EMP_NO = e.EMP_NO
+					JOIN CUSTOMER c ON b.CUST_NO = c.CUST_NO
+				WHERE b.buy_date = #{buy_date}
+				ORDER BY b.buy_wdate DESC
+				) a
+   				 )
+   			 WHERE rn BETWEEN #{start} and #{end}
+</select>
+
+
+<select id="LslstatusSearchtotCnt" resultType="int" parameterType="SLBuying">
+
+		    SELECT COUNT(*)
+			FROM buying b
+			JOIN customer c ON b.cust_no = c.cust_no
+			WHERE c.cust_type = 1
+			AND (
+			    (b.buy_status = #{buy_status}) 
+			    OR (b.buy_status =#{buy_status}) 
+			    OR (b.buy_status = #{buy_status}) 
+			    OR (b.buy_status = #{buy_status})
+			)
+	</select>
+	
+	<select id="LslStatusSearchAllList" parameterType="SLBuying" resultType="SLBuying">
+	  SELECT *
+	    FROM
+	    (
+            SELECT rownum rn, a.*
+            FROM
+                ( SELECT
+			b.*,
+			e.EMP_NAME,
+			c.CUST_NAME,
+			CASE
+				WHEN b.buy_status = 0 THEN '구매 진행중'
+				WHEN b.buy_status = 1 THEN '구매 취소'
+				WHEN b.buy_status = 2 THEN '구매 완료'
+				WHEN b.buy_status = 5 THEN '수불 완료'
+			END AS buy_status_detail,
+			(
+				SELECT COUNT(DISTINCT bd.P_ITEMCODE)
+		        FROM buying_detail bd
+		        WHERE BD.CUST_NO = B.CUST_NO
+		        AND BD.buy_date = b.buy_date
+			) AS productCnt,
+			(
+				SELECT SUM(bd.bd_price * bd.bd_cnt)
+				FROM buying_detail bd
+				WHERE B.CUST_NO = bd.cust_no
+			) AS totalMoney,
+			(
+				SELECT SUM(bd.bd_cnt)
+				FROM buying_detail bd
+				WHERE B.CUST_NO = bd.cust_no
+			) AS totalCnt
+		FROM
+			BUYING b
+			JOIN EMPLOYEE e ON b.EMP_NO = e.EMP_NO
+			JOIN CUSTOMER c ON b.CUST_NO = c.CUST_NO
+			AND (
+                 (b.buy_status = #{buy_status}) 
+			    OR (b.buy_status =#{buy_status}) 
+			    OR (b.buy_status = #{buy_status}) 
+			    OR (b.buy_status = #{buy_status})
+		)
+		ORDER BY b.buy_wdate DESC
+		 ) a
+		    )
+		    WHERE rn BETWEEN #{start} and #{end}
+	
+	</select>
+	
+	<select id="LslsearchKeywordtotCnt" parameterType="SLBuying" resultType="int">
+		select count(*)
+		from
+		buying B,customer c
+		WHERE b.cust_no = c.cust_no
+		and c.cust_type = 1
+        and c.cust_name  like '%' || #{keyword} || '%'
+	</select>
+	
+	<select id="LslkeywordSearchAllList" parameterType="SLBuying" resultType="SLBuying">
+	  SELECT *
+	  FROM
+	   (
+            SELECT rownum rn, a.*
+            FROM
+                ( SELECT
+			b.*,
+			e.EMP_NAME,
+			c.CUST_NAME,
+			CASE
+				WHEN b.buy_status = 0 THEN '구매 진행중'
+				WHEN b.buy_status = 1 THEN '구매 취소'
+				WHEN b.buy_status = 2 THEN '구매 완료'
+				WHEN b.buy_status = 5 THEN '수불 완료'
+			END AS buy_status_detail,
+			(
+				SELECT COUNT(DISTINCT bd.P_ITEMCODE)
+		        FROM buying_detail bd
+		        WHERE BD.CUST_NO = B.CUST_NO
+		        AND BD.buy_date = b.buy_date
+			) AS productCnt,
+			(
+				SELECT SUM(bd.bd_price * bd.bd_cnt)
+				FROM buying_detail bd
+				WHERE B.CUST_NO = bd.cust_no
+			) AS totalMoney,
+			(
+				SELECT SUM(bd.bd_cnt)
+				FROM buying_detail bd
+				WHERE B.CUST_NO = bd.cust_no
+			) AS totalCnt
+		FROM
+			BUYING b
+			JOIN EMPLOYEE e ON b.EMP_NO = e.EMP_NO
+			JOIN CUSTOMER c ON b.CUST_NO = c.CUST_NO
+			WHERE  c.cust_name  like '%' || #{keyword} || '%' 
+			ORDER BY b.buy_wdate DESC
+			) a
+    )
+    WHERE rn BETWEEN #{start} and #{end}
+	</select>
+
+
+<select id="LslbuyingDetail"  parameterType="SLBuying" resultType="SLBuying">     
+   	SELECT 
+	    b.*,
+	    e.emp_name,
+	    c.cust_name,
+    CASE
+        WHEN b.buy_status = 0 THEN '구매 진행중'
+        WHEN b.buy_status = 1 THEN '구매 취소'
+        WHEN b.buy_status = 2 THEN '구매 완료'
+        WHEN b.buy_status = 5 THEN '수불 완료'
+    END AS buy_status_detail
+    FROM 
+	        buying b
+	    INNER JOIN 
+	        employee e ON b.emp_no = e.emp_no
+	    INNER JOIN 
+	        customer c ON b.cust_no = c.cust_no
+    WHERE 
+        b.cust_no = #{cust_no}
+     AND
+     	b.buy_date = #{buy_date}
+</select>
+<select id="LslproductDetail" parameterType="SLBuying" resultType="SLBuying">
+    SELECT 
+        b.buy_date, bd.cust_no, bd.bd_cnt, p.p_name, p.p_itemcode, bd.bd_price, SUM(bd.bd_cnt * bd.bd_price) AS totalMoney
+    FROM 
+        buying b
+        JOIN buying_detail bd ON b.buy_date = bd.buy_date AND b.cust_no = bd.cust_no
+        JOIN product p ON bd.p_itemcode = p.p_itemcode
+    WHERE  
+        bd.cust_no = #{cust_no}
+        AND bd.buy_date = #{buy_date}
+    GROUP BY  
+        b.buy_date, bd.cust_no, bd.bd_cnt, p.p_name, p.p_itemcode, bd.bd_price
+</select>
+	
+	<select id="LslproductList" resultType="SLProduct" >
+		select p.*
+        from product p
+        where p.p_fac_gubun = 1
+        and P_ISDELETED = 0
+	</select>
+	
+	<insert id="LsladdProduct" parameterType="SLBuying_detail">
+			 insert into buying_detail values (#{buy_date}, #{cust_no}, #{p_itemcode}, #{bd_cnt}, #{bd_price}) 
+	</insert>
+	
+	
+	<select id="LslgetProductList" parameterType="SLProduct"  resultType="SLProduct">
+		select p_itemcode
+        from buying_detail
+        where cust_no = #{cust_no}
+	    and buy_date = #{buy_date}
+	</select>
+	
+	<delete id="LsldeleteProduct" parameterType="SLBuying_detail">
+		delete from buying_detail 
+		where cust_no = #{cust_no} 
+		and buy_date= #{buy_date} 
+		and p_itemcode= #{p_itemcode}
+	</delete>
+	
+	<update id="LslbuyingModify" parameterType="SLBuying">
+		UPDATE buying
+        SET buy_note = #{buy_note}
+        WHERE buy_date = #{buy_date}
+        AND cust_no = #{cust_no}
+	</update>
+	
+	<update id="LslproductCntModify" parameterType="SLBuying_detail">
+		UPDATE buying_detail
+        SET bd_cnt = #{bd_cnt}
+        WHERE buy_date = #{buy_date}
+        AND cust_no = #{cust_no}
+        AND p_itemcode = #{p_itemcode}
+	</update>
+	
+	<update id="LslbuyStatusChange" parameterType="SLBuying">
+		UPDATE buying
+        SET buy_status = #{buy_status}
+        WHERE buy_date = #{buy_date}
+        AND cust_no = #{cust_no}
+        AND buy_status != 1
+	</update>
+	
+	<select id="LslcustomerSearch" parameterType="SLBuying" resultType="SLBuying">
+	SELECT c.*, e.emp_name
+	FROM customer c
+	JOIN employee e ON c.emp_no = e.emp_no
+	Where c.cust_type = #{cust_type}
+	and c.CUST_ISDELETED = 0
+	AND c.cust_name LIKE '%' || #{keyword} || '%'
+	</select>
+	
+	<insert id="LslbuyingApplyWrite" parameterType="SLBuying">
+	INSERT INTO buying (buy_date, cust_no, emp_no, buy_title, buy_status, buy_manager, buy_note, buy_wdate) 
+	VALUES (#{buy_date}, #{cust_no}, #{emp_no}, COALESCE(#{buy_title}, ''), 0, #{buy_manager}, #{buy_note}, SYSDATE)
+
+	</insert>
+	
+	<select id="LslgetManagerList" parameterType="SLBuying" resultType="SLBuying" >
+	SELECT e.emp_name, e.emp_no
+	FROM EMPLOYEE e
+	WHERE e.dept_no = #{dept_no}
+	</select>
+
+
+	<insert id="LslbuyingApplyProductList" parameterType="SLBuying_detail">
+        insert into buying_detail (buy_date, cust_no, p_itemcode, bd_cnt, bd_price)
+        values (#{buy_date}, #{cust_no}, #{p_itemcode}, #{bd_cnt}, #{bd_price})  
+	</insert>
+	
+	
+	<select id="LslcheckBuyData" parameterType="SLBuying" resultType="SLBuying">
+		SELECT b.*
+		from buying b
+		where b.buy_date = #{buy_date}
+		and b.cust_no = #{cust_no}
+	</select>
+	
+	<select id="LslclosingStatu" parameterType="SLBuying" resultType="int">
+		select rnpc_gubun
+		from rnp_closing
+		where rnpc_year_month_day = #{rnpc_year_month_day}
+	</select>
+	
+	<select id="LslcheckData" parameterType="SLBuying" resultType="int">
+		select count(*)
+		from rnp_closing
+		where rnpc_year_month_day = #{rnpc_year_month_day}
+	
+	</select>
+	
+	<select id="LslcheckTransaction" parameterType="SLBuying" resultType="int">
+		select count(*)
+		from buying 
+		where buy_date = #{buy_date}
+		and cust_no = #{cust_no}
+	</select>
+	
+</mapper>

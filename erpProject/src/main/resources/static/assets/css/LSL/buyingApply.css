@@ -1,0 +1,358 @@
+/* 구매 상세 뒤 박스 */
+
+.buyDetail {
+	position:relative;
+	padding-top:130px;
+	padding-bottom:100px;
+	margin-top: 30px;
+	margin-bottom:80px;
+	margin-left: auto; 
+    margin-right: auto; 
+	width: 100%;
+	height: 100%;
+	background: white;
+	border-radius: 10px;
+
+}
+
+
+/* Title */
+.buyDetailLabel {
+	position:absolute;
+	top: 20px;
+	left: 20px;
+	font-size: 2rem;
+}
+
+
+
+/* 상세 내역 박스 */
+.detailBox {
+	position:relative;
+	width: 100%;
+	margin-left: auto; 
+    margin-right: auto; 
+	
+}
+
+
+
+
+/* 내용 박스 */
+
+.titleBox {
+    height: 130px;
+    margin-left: auto;
+    margin-right: auto;
+  
+}
+
+#titleBox1 {
+	margin-top: 30px;
+	display: flex;
+}
+
+
+#detailTitleLabel {
+	font-size: 0.8rem;
+	margin-top: 10px;
+	margin-left: 20px;
+	margin-right: -10px;
+	height: 20px;
+	width: 110px;
+	text-align: center;
+
+}
+#buy_title {
+	width: 600px;
+	margin-left: 10px;
+	margin-right: 30px;
+	text-align: center;
+}
+
+#buy_manager {
+	width: 600px;
+	margin-left: 10px;
+	margin-right: 30px;
+	text-align: center;
+}
+
+
+#detailManagerLabel {
+	font-size: 0.8rem;
+	margin-top: 10px;
+	margin-left: 5px;
+	margin-right: 5px;
+	height: 20px;
+	width: 110px;
+	text-align: center;
+
+}
+
+#cust_name {
+	width: 600px;
+	margin-left: 10px;
+	margin-right: 30px;
+	text-align: center;
+}
+#emp_name {
+	width: 600px;
+	margin-left: 10px;
+	margin-right: 30px;
+	text-align: center;
+}
+
+
+
+
+/* 비고 */
+
+.colNote {
+	width: 100%;
+	margin-top: -10px;
+	margin-left: auto; 
+    margin-right: auto;
+    color: black; 
+    text-align: center;
+  	font-weight: bold;
+}
+
+.colNoteBox {
+    width: 95%;
+    height: 250px;
+    margin-bottom: 10px;
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 10px;
+    border: 1px solid #d2d6da;
+    display: flex;
+    justify-content: center; 
+    align-items: center; 
+}
+
+
+/* 구매 아이템 select Box */
+
+.buyItemSelectBox {
+	display: flex;
+	width: 95%;
+	height: 100px;
+	margin-top: 50px;
+	margin-left: auto;
+	margin-right: auto;
+	border-radius: 10px;
+	border: 1px solid #d2d6da;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+#buyingItemSelect {
+	width: 350px;
+	height: 40px;
+	margin-right: 80px;
+}
+
+.buyItemCnt {
+	width: 350px;
+	height: 40px;
+	border-radius: 10px;
+	border: 1px solid #d2d6da;
+}
+
+.buyItemSelectBox p {
+	margin-top: 10px;
+	margin-right: 25px;
+	font-weight: bold;
+	color: black;
+}
+
+
+
+
+
+/* 구매 리스트  */
+
+.buyList {
+	width: 95%;
+	height: 35px;
+	line-height: 35px;
+	margin-top: 40px;
+	margin-bottom: 10px;
+	margin-left: auto; 
+    margin-right: auto; 
+    border-radius: 10px;
+	border: 1px solid #d2d6da;
+
+}
+
+
+/*구매 리스트 Title*/
+
+.buyListTitle {
+    display: flex;
+    justify-content: space-between;
+    margin-left: 60px;
+    margin-right: 220px;
+    color: black;
+    font-weight: bold;
+}
+
+
+/*구매 리스트 Box */
+
+.buyList {
+    list-style-type: none;  
+    padding: 0;
+}
+
+
+.buyListItem {
+    display: flex;
+    justify-content: space-between;
+
+}
+
+.buyListItem  input{
+	width: 25%;
+	margin-top: 15px;
+	margin-right: 135px;
+	border-radius: 10px;
+	border: 1px solid #d2d6da;
+	text-align: center;
+}
+
+
+
+/* 버튼 */
+
+#buyModify {
+	position: absolute;
+	top: 65px;
+	margin-top: -10px;
+	right: 210px;
+}
+
+
+#buyComple{
+	position: absolute;
+	margin-top: -10px;
+	top: 65px;
+	right: 140px;
+	
+}
+
+#buyApplyBtn {
+	position: absolute;
+	font-size: 0.9rem;
+	width: 100px;
+	top: 55px;
+	right: 35px;
+}
+
+.pDeleteBtn {
+	position: absolute;
+	width: 70px;
+	font-size: 12px;
+	margin-top: 15px;
+	right:  20px; 
+
+}
+
+
+.pModifyBtn {
+	position: absolute;
+	width: 70px;	
+	font-size: 12px;
+	margin-top: 15px;	
+	right:  95px;
+
+} 
+
+
+#addBtn {
+	height: 40px;
+	margin-top: 15px;
+	margin-left: 20px;
+
+}
+
+
+
+
+/* 구매 상태 Box */
+.buyStatusBox {
+	position: absolute;
+	top: 75px;
+	left: 23px;
+	width: 100px;
+	height: 40px;
+	text-align: center;
+	font-weight: bold;
+	line-height:40px;
+	border: 1px solid #d2d6da;
+	border-radius: 10px;
+	color: white;
+	background-color: #5e72e4d9;
+}
+
+
+#customerSearchBtn {
+	position: absolute;
+	margin-bottom : 20px;
+	top: 110px;
+	right: 30px;
+}
+
+
+/* 거래처 검색 팝업 창 */
+
+.modal-footer {
+	height: 120px;
+}
+.modalbody {
+	height: 30px;
+	border: none !important;
+}
+
+.cusSearchBox {
+	position: absolute;
+	margin-top: 10px;
+	left: 30px;
+	width: 320px;
+	height: 40px;
+	border-radius: 5px;
+}
+
+.cusSearchName {
+	position:absolute;
+	width: 300px;
+	top: 130px;
+	left: 35px;
+	
+}
+
+#cusSearchBtn {
+	position: absolute;
+	top: 70px;
+	height: 40px;
+	right: 70px;
+	border: 1px solid #d2d6da;
+	border-radius: 10px;
+	color: white;
+}
+
+#close {
+	position: absolute;
+	top: 150px;
+}
+#cusChioceBtn {
+	position: absolute;
+	top: 120px;
+	right: 80px;
+}
+
+.cusSearchName {
+	cursor: pointer;
+}
+

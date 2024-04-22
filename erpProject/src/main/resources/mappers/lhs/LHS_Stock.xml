@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oracle.erpProject.LHS_StockMapper">
+
+	<select id="lhsGetTotalStock" parameterType="LHS_Stock" resultType="int">
+		SELECT count(*) FROM stock WHERE st_year_month = #{st_year_month}
+			<choose>
+				<when test="gubun == 'all'">
+     
+				</when>
+				<when test="gubun == 'begin'">
+					AND st_begin_end = 0
+				</when>
+				<when test="gubun == 'end'">
+					AND st_begin_end = 1
+				</when>
+			</choose>
+          	<if test="p_itemcode != 0">
+       			AND p_itemcode = #{p_itemcode}
+       		</if>
+	</select>
+	
+	<!-- 순번pg 구분s 제품코드s 제품명p 수량s 등록날짜s -> product, stock 조인 -->
+	<select id="lhsGetListStock" parameterType="LHS_Stock" resultType="LHS_Stock">
+		SELECT b.*,
+		    CASE WHEN st_begin_end = 0 THEN '기초'
+		        WHEN st_begin_end = 1 THEN '기말'
+		    END AS st_begin_end_gubun
+		FROM
+		    (SELECT rownum rn, a.*
+		    FROM
+		        (SELECT p.p_name, s.st_begin_end, s.p_itemcode, s.st_quantity,
+		        		to_char(s.st_regdate, 'yyyy-MM-dd') st_regdate
+		        FROM product p, stock s
+		        WHERE p.p_itemcode = s.p_itemcode
+		            AND s.st_year_month = #{st_year_month}
+		            <choose>
+						<when test="gubun == 'all'">
+						</when>
+						<when test="gubun == 'begin'">
+							AND st_begin_end = 0
+						</when>
+						<when test="gubun == 'end'">
+							AND st_begin_end = 1
+						</when>
+					</choose>
+		           	<if test="p_itemcode != 0">
+                    	AND s.p_itemcode = #{p_itemcode}
+               		</if>
+		        ORDER BY st_begin_end DESC, s.p_itemcode 
+		        ) a
+			) b
+		WHERE rn BETWEEN #{start} and #{end}
+
+	</select>
+	
+	<insert id="lhsRegistStockNewItemBegin" parameterType="LHS_Stock">
+		INSERT INTO stock
+		VALUES (#{st_year_month}, 0, #{p_itemcode}, #{st_quantity}, sysdate)
+	</insert>
+	
+	<insert id="lhsRegistStockNewItemEnd" parameterType="LHS_Stock">
+		INSERT INTO stock
+		VALUES (#{st_year_month}, 1, #{p_itemcode}, #{st_quantity}, sysdate)
+	</insert>
+	
+	<select id="lhsClosingRnP" parameterType="LHS_RnP_closing" resultType="int">
+		SELECT stock_close.rnp_closing_process(#{rnpc_year_month_day})
+		FROM dual
+	</select>
+	
+	<select id="lhsUnclosingRnP" parameterType="LHS_RnP_closing" resultType="int">
+		SELECT stock_close.rnp_unclosing_process(#{rnpc_year_month_day})
+		FROM dual
+	</select>
+	
+	<select id="lhsMonthlyClosing" parameterType="LHS_RnP_closing" resultType="int">
+		SELECT stock_close.month_closing_process(#{rnpc_year_month_day})
+		FROM dual
+	</select>
+
+</mapper>
